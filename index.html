@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Management Dashboard</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-muted: #7d7d7d;
+            --status-green: #27ae60;
+            --border-radius: 16px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text-main);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Top Navigation Bar */
+        .header {
+            background: #fff;
+            padding: 18px;
+            border-radius: var(--border-radius);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        .header h1 { font-size: 18px; margin: 0; font-weight: 600; }
+
+        /* The Card Section - Straight and Enlarged */
+        .card-wrapper {
+            width: 100%;
+            aspect-ratio: 1.58 / 1;
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .card-bg {
+            width: 100%;
+            height: 100%;
+            /* Modified Dropbox link to force direct image loading */
+            background-image: url('https://www.dropbox.com/scl/fi/umudicu593zygbp5hvtlz/Photo-Dec-23-2025-3-57-44-AM.png?rlkey=y4jm4js37fekj2isf1ft1gsr5&raw=1');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .view-details-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 2;
+        }
+
+        .view-details-btn:hover { background: #fff; transform: scale(1.05); }
+
+        /* Detail Overlay */
+        .details-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(8px);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            padding: 30px;
+            color: white;
+            z-index: 5;
+            cursor: pointer;
+        }
+
+        .details-overlay.active { display: flex; }
+
+        .detail-row { margin-bottom: 20px; }
+        .label { font-size: 11px; color: #b0b0b0; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; }
+        .value { font-size: 22px; font-weight: 700; letter-spacing: 3px; }
+
+        /* Info Boxes */
+        .section-box {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        .label-text { color: var(--text-muted); font-size: 14px; display: flex; align-items: center; gap: 4px; }
+        .amount-main { font-size: 36px; font-weight: 800; margin: 10px 0; }
+        .emoji-flex { font-size: 22px; display: flex; gap: 6px; }
+
+        .pill-gray {
+            background: #f0f2f5;
+            padding: 10px 16px;
+            border-radius: 40px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            color: var(--text-muted);
+        }
+
+        /* Wallet Action */
+        .wallet-card {
+            background: #fff;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .google-btn {
+            background: #000;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* History */
+        .activity-head { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 20px; }
+        .item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-top: 1px solid #f0f0f0; }
+        .item-left { display: flex; gap: 14px; align-items: center; }
+        .icon-circle { width: 44px; height: 44px; background: #f0f2f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .status { color: var(--status-green); font-size: 13px; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <i data-lucide="arrow-left"></i>
+        <h1>Card</h1>
+        <i data-lucide="settings"></i>
+    </div>
+
+    <div class="card-wrapper">
+        <div class="card-bg">
+            <button id="mainBtn" class="view-details-btn" onclick="showDetails()">View Details</button>
+            
+            <div id="detailsBox" class="details-overlay" onclick="hideDetails()">
+                <div class="detail-row">
+                    <div class="label">Card Number</div>
+                    <div class="value">5399 8354 9849 2922</div>
+                </div>
+                <div style="display: flex; gap: 50px;">
+                    <div class="detail-row">
+                        <div class="label">Exp Date</div>
+                        <div class="value">02/29</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="label">CVV</div>
+                        <div class="value">345</div>
+                    </div>
+                </div>
+                <p style="font-size: 11px; color: #666; margin-top: 15px;">Tap anywhere to close</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-box">
+        <div class="label-text">Amount to be spent <i data-lucide="chevron-right" size="14"></i></div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 class="amount-main">$1,235.96</h2>
+            <div class="emoji-flex">😊 💰 👜 😊 💎</div>
+        </div>
+        <div class="pill-gray">
+            <i data-lucide="refresh-cw" size="14"></i> Selected currency <i data-lucide="chevron-right" size="14"></i>
+        </div>
+    </div>
+
+    <div class="wallet-card">
+        <div class="google-btn">
+            <i data-lucide="wallet" size="18"></i> Add to Google Wallet
+        </div>
+        <i data-lucide="chevron-right" style="color: #ddd;"></i>
+    </div>
+
+    <div class="section-box">
+        <div class="activity-head">
+            <span>Recent activity</span>
+            <span style="color: #999; font-size: 14px;">Completed</span>
+        </div>
+        
+        <div class="item">
+            <div class="item-left">
+                <div class="icon-circle"><i data-lucide="file-text"></i></div>
+                <div>
+                    <div style="font-weight: 600;">Sent from OKX WALLET</div>
+                    <div style="font-size: 13px; color: #888;">From: IFD*Food</div>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-weight: 700;">1,200.00 USD</div>
+                <div class="status">Completed</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Load icons
+    lucide.createIcons();
+
+    function showDetails() {
+        document.getElementById('detailsBox').classList.add('active');
+        document.getElementById('mainBtn').style.display = 'none';
+    }
+
+    function hideDetails() {
+        document.getElementById('detailsBox').classList.remove('active');
+        document.getElementById('mainBtn').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
